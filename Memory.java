@@ -5,6 +5,7 @@ import java.util.Random;
 public class Memory {
 
   private static volatile long ramRunningTotal;
+  private static final int NS_IN_S = 1000000000;
 
   public static void main(String[] args) {
     int size = Integer.valueOf(args[0]);
@@ -18,6 +19,9 @@ public class Memory {
     // Task 2
     System.out.println("Task 2");
     taskTwo(size, experiments, seed);
+
+    // Task 3
+    System.out.println("Task 3");
   }
 
   public static void taskOne(int size, int experiments) {
@@ -27,16 +31,16 @@ public class Memory {
     for (int j = 0; j < experiments; j++) {
       if (size % 2 == 0) {
         for (int i = 0; i < size; i++) {
-          runningTotal -= size;
+          runningTotal += size;
         }
       } else {
         for (int i = 0; i < size; i++) {
-          runningTotal += size;
+          runningTotal -= size;
         }
       }
     }
-    totalTime = (System.nanoTime() - totalTime) / experiments;
-    System.out.printf("Regular: %d seconds\n", totalTime);
+    totalTime = ((System.nanoTime() - totalTime) / experiments) / NS_IN_S;
+    System.out.printf("Regular: %.5f seconds\n", totalTime);
 
     // ram
     ramRunningTotal = 0;
@@ -44,25 +48,46 @@ public class Memory {
     for (int j = 0; j < experiments; j++) {
       if (size % 2 == 0) {
         for (int i = 0; i < size; i++) {
-          ramRunningTotal -= size;
+          ramRunningTotal += size;
         }
       } else {
         for (int i = 0; i < size; i++) {
-          ramRunningTotal += size;
+          ramRunningTotal -= size;
         }
       }
     }
-    ramTotalTime = (System.nanoTime() - ramTotalTime) / experiments;
-    System.out.printf("Volatile: %d seconds\n", ramTotalTime);
-    System.out.printf("Avg regular sum: %d\nAvg volatile sum: %d", runningTotal, ramRunningTotal);
+    ramTotalTime = ((System.nanoTime() - ramTotalTime) / experiments) / NS_IN_S;
+    System.out.printf("Volatile: %.5f seconds\n", ramTotalTime);
+    System.out.printf("Avg regular sum: %.2f\nAvg volatile sum: %.2f", runningTotal, ramRunningTotal);
   }
 
   public static void taskTwo(int size, int experiments, int seed) {
     Integer[] randomIntegers = new Integer[size];
     Random random = new Random(seed);
+    // populate array
     for (int i : randomIntegers) {
       i = random.nextInt();
     }
+    long sum = 0;
+    double knownElementAccessTime = (double) System.nanoTime();
+    for (int i = 0; i < experiments; i++) {
+      // access known element in first 10% of array
+      sum += randomIntegers[0];
+    }
+    knownElementAccessTime = (double) (System.nanoTime() - knownElementAccessTime) / experiments;
+    double randomElementAccessTime = (double) System.nanoTime();
+    for (int i = 0; i < experiments; i++) {
+      // access random element in last 10% of array
+      sum += randomIntegers[size * (random.nextDouble() + 0.9)];
+    }
+    randomElementAccessTime = (double) (System.nanoTime() - randomElementAccessTime) / experiments;
+    System.out.printf("Avg time to access known element: %.2f nanoseconds\n", knownElementAccessTime);
+    System.out.printf("Avg time to access random element: %.2f nanoseconds", randomElementAccessTime);
+    System.out.printf("Sum: %.2f", sum);
+  }
+
+  public static void taskThree(int size, int experiments) {
+
   }
 
 }
