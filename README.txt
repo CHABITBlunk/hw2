@@ -2,6 +2,7 @@
 
 Author: HABIT Blunk
 Date: 2023-10-09
+Contents: Memory.java (the main file with all methods including a main method)
 
 ## Task 1: Volatile vs Cached
 | Experiment | Volatile  | Cached    |
